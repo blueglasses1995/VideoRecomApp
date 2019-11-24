@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+        {% block header %}
+          <h1>{{ movie.title }}</h1>
+          <h1>{{ movie.genre.name }}</h1>
+        {% endblock header %}
+
+{% block content %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">公開日</th>
+          <th scope="col">あらすじ</th>
+          <th scope="col">動画URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ movie.release_date }}</td>
+          <td>{{ movie.summary }}</td>
+          <td>{{ movie.href }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>口コミ一覧<h3/>
+      {% for post in posts %}
+        <div class="container">
+          <div class="row">
+              <div class="card">
+              <div class="card-header">{{ post.user }}</div>
+                  <div class="card-body">
+                      <h5 class="card-title">{{ post.date_uploaded }}</h5>
+                      <h5 class="card-title">{% for tag in post.tags.all %}#{{ tag.name }}#{% endfor %}</h5>
+                      <p class="card-text">{{ post.content }}</p>
+                  </div>
+              </div>
+          </div>
+        </div>
+      {% endfor %}
+{% endblock content %}

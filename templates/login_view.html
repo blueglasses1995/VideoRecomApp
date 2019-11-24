@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+    {% block header %}
+        <h1>ログイン<h1/>
+    {% endblock header %}
+
+    {% block content %}
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <td>{{ form.username.label_tag }}</td>
+                    <td>{{ form.username }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form.email.label_tag }}</td>
+                    <td>{{ form.email }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form.password.label_tag }}</td>
+                    <td>{{ form.password }}</td>
+                </tr>
+            </table>
+
+            <input type="submit" value="ログイン">
+        </form>
+    {% endblock content %}
