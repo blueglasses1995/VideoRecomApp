@@ -10,45 +10,55 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-dark bg-dark navbar-fixed-top">
-            <a class="navbar-brand" href="/">トップページ</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-fixed-top">
+          <a class="navbar-brand" href="/">トップページ</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
 
-            <div class="collapse navbar-collapse" id="navbarText">
-                {% if user.is_authenticated %}
-                <h3>{{ login_user.username }}さん</h3>
-                {% endif %}
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            {% if user.is_authenticated %}
+                <h5>{{ login_user.username }}さん</h5>
+            {% endif %}
 
-                {% if user.is_authenticated %}
-                <ul class="navbar-navmr-auto">
-                    <li class="nav-itemactive">
-                        <a class="nav-link" href="/post/create_view/">新規投稿<span class="sr-only">(current)</span></a>
-                    </li>
+            {% if user.is_authenticated %}
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="/post/create_view/">新規投稿<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/recommendation/">口コミ</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/profile/{{ login_user.pk }}">マイページ</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  アカウント
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="#">フォローリスト</a>
+                  <a class="dropdown-item" href="#">フォロワーリスト</a>
+                  <a class="dropdown-item" href="#">お気に入り</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#">設定</a>
+                </div>
+              </li>
+            </ul>
+            {% endif %}
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="/recommendation/">口コミ</a>
-                    </li>
+            {% if user.is_authenticated %}
+                <span class="navbar-text"><a href="/logout" class="btn btn-primary">ログアウト</a></span>
+            {% else %}
+                <span class="navbar-text"><a href="/register/create_user_view" class="btn btn-primary">会員登録</a></span>
+                <span class="navbar-text"><a href="/accounts/login/" class="btn btn-primary">ログイン</a></span>
+            {% endif %}
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="/profile/{{ login_user.pk }}">マイページ</a>
-                    </li>
-                </ul>
-                {% endif %}
-
-                <form class="form-inline my-2 my-lg-0">
-                    <input class="form-control mr-sm-2" type="text" placeholder="キーワードを入力">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">検索</button>
-                </form>
-
-                {% if user.is_authenticated %}
-                    <span class="navbar-text"><a href="/logout" class="btn btn-primary">ログアウト</a></span>
-                {% else %}
-                    <span class="navbar-text"><a href="/register/create_user_view" class="btn btn-primary">会員登録</a></span>
-                    <span class="navbar-text"><a href="/accounts/login/" class="btn btn-primary">ログイン</a></span>
-                {% endif %}
-            </div>
+            <form class="form-inline my-2 my-lg-0">
+              <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+          </div>
         </nav>
 
         <div class="jumbotron">
