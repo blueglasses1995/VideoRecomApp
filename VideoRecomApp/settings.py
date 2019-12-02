@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'debug_toolbar',
 #    'rest_framework',
     'taggit',
     'register',
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'VideoRecomApp.urls'
@@ -137,3 +139,5 @@ STATICFILES_DIRS = [
 ]
 
 #AUTH_USER_MODEL = 'register.User'
+
+INTERNAL_IPS = ['127.0.0.1']

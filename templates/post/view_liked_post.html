@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+    {% block header %}
+        <h1>いいねした投稿<h1/>
+        {% block filter %}
+        {% endblock filter %}
+    {% endblock header %}
+
+    {% block content %}
+      {% for postlike in postlikes %}
+        <div class="container">
+          <div class="row">
+              <div class="card">
+              <a class="card-header" href="/profile/{{ postlike.post.user.id }}" class="btn btn-primary">{{ postlike.post.user }}</a>
+                  <div class="card-body">
+                      <h5 class="card-title">{{ postlike.post.date_uploaded }}</h5>
+                      {% for tag in postlike.post.tags.all %}
+                                              <a href="/recommendation/{{ tag.name }}" class="btn btn-primary">{{ tag.name }}</a>
+                      {% endfor %}
+                      <p class="card-text">{{ postlike.post.content }}</p>
+                      <a href="/post/{{ postlike.post.id }}/postlike/">いいね！</a>{{ postlike.post.like_num }}
+                      <a href="/movie/{{ postlike.post.movie.id }}/" class="btn btn-primary">{{ postlike.post.movie.title }}の詳細</a>
+                      <a href="/post/{{ postlike.post.id }}/" class="btn btn-primary">投稿詳細</a>
+                  </div>
+              </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endblock content %}

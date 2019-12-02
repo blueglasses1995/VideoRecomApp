@@ -8,23 +8,32 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1SmPUdOyI6c575ABKD07MW6heAl" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/templates" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/templates/movie" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\blueg\VideoRecomApp\VideoRecomApp\migrations\新しいフォルダー" />
       <recent name="C:\Users\blueg\VideoRecomApp\templates" />
       <recent name="C:\Users\blueg\VideoRecomApp\templates\post" />
       <recent name="C:\Users\blueg\VideoRecomApp\templates\register" />
       <recent name="C:\Users\blueg\VideoRecomApp" />
-      <recent name="C:\Users\blueg\VideoRecomApp\VideoRecomApp" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\blueg\VideoRecomApp\templates\movie" />
+      <recent name="C:\Users\blueg\VideoRecomApp\templates\post" />
       <recent name="C:\Users\blueg\VideoRecomApp\templates" />
       <recent name="C:\Users\blueg\VideoRecomApp\movie" />
     </key>
@@ -64,5 +73,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/post/urls.py</url>
+          <line>11</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

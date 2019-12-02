@@ -13,7 +13,8 @@
                   <div class="card-body">
                       <h5 class="card-title">{{ movie.genre.name }}</h5>
                       <p class="card-text">{{ movie.title }}</p>
-                      <a href="{{movie.id}}/" class="btn btn-primary">詳細ページ</a>
+                      <a href="/movie/{{movie.id}}/movielike" class="btn btn-primary">お気に入り</a>{{ movie.like_num }}
+                      <a href="/movie/{{movie.id}}/" class="btn btn-primary">詳細ページ</a>
                   </div>
               </div>
           </div>

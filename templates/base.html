@@ -17,12 +17,18 @@
           </button>
 
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            {% if user.is_authenticated %}
-                <h5>{{ login_user.username }}さん</h5>
-            {% endif %}
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="/">作品一覧<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="/movie/search/">作品検索<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="/article/">記事<span class="sr-only">(current)</span></a>
+              </li>
 
             {% if user.is_authenticated %}
-            <ul class="navbar-nav mr-auto">
               <li class="nav-item active">
                 <a class="nav-link" href="/post/create_view/">新規投稿<span class="sr-only">(current)</span></a>
               </li>
@@ -30,21 +36,26 @@
                 <a class="nav-link" href="/recommendation/">口コミ</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/profile/{{ login_user.pk }}">マイページ</a>
+                <a class="nav-link" href="/profile/{{ login_user.pk }}/">マイページ</a>
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   アカウント
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="/post/view_liked_post/">いいねした投稿</a>
+                <a class="dropdown-item" href="/movie/view_liked_movie/">お気に入りの映画</a>
                   <a class="dropdown-item" href="#">フォローリスト</a>
                   <a class="dropdown-item" href="#">フォロワーリスト</a>
-                  <a class="dropdown-item" href="#">お気に入り</a>
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item" href="#">設定</a>
                 </div>
               </li>
+            {% endif %}
+
             </ul>
+            {% if user.is_authenticated %}
+                <h5>{{ login_user.username }}さん</h5>
             {% endif %}
 
             {% if user.is_authenticated %}
@@ -54,10 +65,12 @@
                 <span class="navbar-text"><a href="/accounts/login/" class="btn btn-primary">ログイン</a></span>
             {% endif %}
 
+<!--
             <form class="form-inline my-2 my-lg-0">
               <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
               <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </form>
+-->
           </div>
         </nav>
 

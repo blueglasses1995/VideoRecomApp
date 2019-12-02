@@ -1,12 +1,58 @@
 {% extends 'base.html' %}
 
     {% block header %}
-        <h1>1投稿<h1/>
+        <h1>投稿<h1/>
     {% endblock header %}
 
     {% block content %}
-        <h1>{{title}}</h1>
-        <h1>{{post_id}}</h1>
+    <div class="container">
+      <div class="row">
+          <div class="card">
+              <a class="card-header" href="/profile/{{ post.user.id }}/" class="btn btn-primary">{{ post.user }}</a>
+              <div class="card-body">
+                  <h5 class="card-title">{{ post.movie.title }}  {{ post.date_uploaded }}</h5>
+                  {% for tag in post.tags.all %}
+                      <a href="/recommendation/{{ tag.name }}" class="btn btn-primary">{{ tag.name }}</a>
+                  {% endfor %}
+                  <p class="card-text">{{ post.content }}</p>
+                  <a href="/post/{{ post.id }}/postlike/">いいね！</a>{{ post.like_num }}
+                  <a href="/movie/{{ post.movie.id }}/" class="btn btn-primary">{{ post.movie.title }}の詳細</a>
+                  <a href="/post/{{ post.id }}/modify/" class="btn btn-primary">編集</a>
+                  <a href="/post/{{ post.id }}/confirm_delete/" class="btn btn-primary">削除</a>
+              </div>
+          </div>
+      </div>
+    </div>
 
-        <img src="/{{filepath}}" style="max-width:320px"/>
+    <h3>コメント<h1/>
+
+    <div class="container">
+      {% for comment in post.comments.all %}
+      <div class="row">
+          <div class="card">
+              <a class="card-header" href="/profile/{{ comment.user.id }}/" class="btn btn-primary">{{ comment.user }}</a>
+              <div class="card-body">
+                  <h5 class="card-title">{{ comment.date_updated }}</h5>
+                  <p class="card-text">{{ comment.content }}</p>
+                  <a href="/post/{{ comment.id }}/commentlike/">いいね！</a>{{ comment.like_num }}
+                  <a href="/post/{{ comment.id }}/modify_comment/" class="btn btn-primary">編集</a>
+                  <a href="/post/{{ comment.id }}/confirm_delete_comment/" class="btn btn-primary">削除</a>
+              </div>
+          </div>
+      </div>
+      {% endfor %}
+    </div>
+
+
+    <form action="/post/{{ post.id }}/upload_comment/" method="POST">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>{{ form.content.label_tag }}</td>
+            <td>{{ form.content }}</td>
+        </tr>
+    </table>
+
+    <button type="submit">コメント</button>
+    </form>
     {% endblock content %}

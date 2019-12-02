@@ -25,10 +25,18 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view),
     path('accounts/login/', LoginView.as_view(template_name='login_view.html'), name='accounts/login/'),
-    path('profile/<int:pk>', views.profile, name='profilepage'),
+    path('profile/<int:pk>/', views.profile, name='profilepage'),
     path('post/', include('post.urls')),
 #    path('review/<int:content_id>', views.review),
+    path('article/', views.view_article),
     path('recommendation/', views.recommendation),
     path('recommendation/<tag_name>', views.tag_recommendation),
     path('admin/', admin.site.urls)
 ]
+
+from django.conf import settings
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

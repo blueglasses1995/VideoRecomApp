@@ -20,6 +20,9 @@
           <td>{{ movie.summary }}</td>
           <td>{{ movie.href }}</td>
         </tr>
+        <tr>
+          <td><a href="/movie/{{movie.id}}/movielike" class="btn btn-primary">お気に入り</a>{{ movie.like_num }}</td>
+        </tr>
       </tbody>
     </table>
 

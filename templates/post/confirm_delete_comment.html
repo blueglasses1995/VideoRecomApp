@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+    {% block header %}
+        <h1>コメントを削除してよろしいですか？<h1/>
+    {% endblock header %}
+
+    {% block content %}
+        <div class="container">
+          <div class="row">
+              <div class="card">
+                  <div class="card-body">
+                      <p class="card-title">{{ comment.user }}</p>
+                      <p class="card-text">{{ comment.content }}</p>
+                      <a href="/post/{{ comment.post_id.pk }}" class="btn btn-primary">戻る</a>
+                      <a href="/post/{{ comment.id }}/delete_comment/" class="btn btn-primary">削除</a>
+                  </div>
+              </div>
+          </div>
+        </div>
+    {% endblock content %}

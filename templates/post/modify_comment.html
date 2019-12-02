@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+    {% block header %}
+        <h1>口コミの修正<h1/>
+    {% endblock header %}
+
+    {% block content %}
+        <form action="/post/{{ comment.id }}/update_comment/" method="POST">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <td>修正前コメント</td>
+                    <td>{{ comment.content }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form.content.label_tag }}</td>
+                    <td>{{ form.content }}</td>
+                </tr>
+            </table>
+
+            <button type="submit">修正</button>
+        </form>
+    {% endblock content %}

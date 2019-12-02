@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Post
-from .forms import PostForm, CommentForm
+from .forms import PostForm
 
 def login_view(request):
     user = authenticate(
@@ -33,6 +33,12 @@ def profile(request, pk):
     #ログインユーザー自身の情報
     login_user = request.user
     return render(request, 'profile.html', {'user': user, 'posts': posts, 'login_user': login_user})
+
+def view_article(request):
+    posts = Post.get_article_by_staff()
+    #ログインユーザー自身の情報
+    login_user = request.user
+    return render(request, 'article.html', {'posts': posts, 'login_user': login_user})
 
 @login_required
 def recommendation(request):
