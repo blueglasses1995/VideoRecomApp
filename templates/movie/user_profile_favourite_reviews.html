@@ -1,0 +1,95 @@
+{% extends 'movie/user_profile_base.html' %}
+
+{% block user_profile_content %}
+    <div id="reviews">
+    <div class="row">
+        {% for review in reviews.object_list %}
+            <div class="col-md-6" style="margin-top: 5px;margin-bottom: 5px;">
+            <div class="card bg-dark">
+                <img src="{{ review.cover_url }}" alt="" class="card-img-top">
+                <div class="card-body">
+                    <h5>
+                        <a href="{% url 'movie:review_info' review.id %}">{{ review.title }}</a>
+                        <span class="float-right">by
+                            <a href="{% url 'movie:user_profile_info' %}?user={{ review.author.id }}"><img src="{{ review.author.avatar_url }}" class="img-fluid rounded-circle" width="30" alt="">{{ review.author }}</a>
+                        </span>
+                    </h5>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline-danger" title="Like" onclick="LikeReview({{ review.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ review.id }}_num">{{ review.likes }}</span></button>
+                    <button class="btn btn-outline-danger" title="Dislike" onclick="DislikeReview({{ review.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ review.id }}_num">{{ review.dislikes }}</span></button>
+                    <button class="btn btn-outline-warning" title="Favourite" onclick="FavouriteReview({{ review.id }})"><i class="fas fa-star"></i><span id="favourite_{{ review.id }}_num">{{ review.favourites }}</span></button>
+
+                </div>
+            </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-white-50 col-12">{{ the_user.username }} 没有收藏任何影评，去看看所有的 <a href="{% url 'movie:review_list' %}" class="btn btn-primary"><i class="fas fa-list"></i> 所有的影评</a></p>
+        {% endfor %}
+    </div>
+    {% load bootstrap4 %}
+    {% if reviews.has_other_pages %}
+        <div class="bg-dark" style="margin-top: 5px;">
+        {% bootstrap_pagination reviews %}
+        </div>
+    {% endif %}
+    </div>
+
+    </div>
+{% endblock %}
+
+
+{% block script %}
+    {{ block.super }}
+    {% load static %}
+    <script type="text/javascript" src="{% static "jquery-rating-star/rating.js" %}"></script>
+    <script>
+    function LikeReview(review_id){
+        $.ajax({
+            url: `/movie/review_like/${review_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${review_id}_num`).text(result.likes);
+                $(`#dislike_${review_id}_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeReview(review_id){
+        $.ajax({
+            url: `/movie/review_dislike/${review_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${review_id}_num`).text(result.likes);
+                $(`#dislike_${review_id}_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteReview(review_id) {
+        $.ajax({
+            url: `/movie/review_favourite/${review_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${review_id}_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+    </script>
+{% endblock %}

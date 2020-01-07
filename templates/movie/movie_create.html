@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+{% block style %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'tempusdominus-datetime-picker/css/tempusdominus-bootstrap-4.min.css' %}" />
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+    <h1>Create Movie</h1>
+        <hr>
+        <form action="" class="form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">{% bootstrap_field form.title %}</div>
+            <div class="col-md-6">{% bootstrap_field form.year %}</div>
+        </div>
+
+
+            {% bootstrap_field form.production_countries %}
+            {% bootstrap_field form.director %}
+            {% bootstrap_field form.key_actors %}
+            {% bootstrap_field form.rating %}
+            {% bootstrap_field form.genres addon_after='<button class="btn btn-outline-primary" type="button" id="showCreateGenreModal"><i class="fas fa-plus"></i></button>' addon_after_class=None %}
+            {% bootstrap_field form.tags addon_after='<button class="btn btn-outline-primary" type="button" id="showCreateTagModal"><i class="fas fa-plus"></i></button>' addon_after_class=None %}
+            <img src="" alt="" class="img-fluid" style="display: none;" id="cover-preview">
+            {% bootstrap_field form.cover %}
+            {% bootstrap_field form.description  show_label=False%}
+            {% bootstrap_field form.link_to_watch %}
+
+
+    {% buttons %}
+      <button type="submit" class="btn btn-primary" id="submit">
+      Submit
+    </button>
+  {% endbuttons %}
+
+        </form>
+
+    </div>
+    
+<div class="modal fade" id="tagCreateModal" tabindex="-1" role="dialog" aria-labelledby="tagCreateModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="TagCreateTitle">Create Tag</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <form action="" class="form"></form>
+          <div class="form-group">
+              <label for="tag_name">Tag Name</label>
+              <input class="form-control form-control-lg" id="tag_name" name="tag_name" required="" value="" type="text" placeholder="Tag Name" maxlength="30">
+              <p id="tag_hint_info" class="text-danger help-text" style="display: none;">Tag name must be filled and accept 1~30 characters.</p>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="createTag">Create Tag</button>
+      </div>
+    </div>
+  </div>
+</div>
+    
+<div class="modal fade" id="genreCreateModal" tabindex="-1" role="dialog" aria-labelledby="genreCreateModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="GenreCreateTitle">Create Genre</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <form action="" class="form"></form>
+          <div class="form-group">
+              <label for="genre_name">Genre Name</label>
+              <input class="form-control form-control-lg" id="genre_name" name="genre_name" required="" value="" type="text" placeholder="Genre Name" maxlength="30">
+              <p id="genre_hint_info" class="text-danger help-text" style="display: none;">Genre name must be filled and accept 1~30 characters.</p>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="createGenre">Create Genre</button>
+      </div>
+    </div>
+  </div>
+</div>    
+
+    
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script src="{% static 'moment.js/moment-with-locales.min.js' %}"></script>
+    <script src="{% static 'tempusdominus-datetime-picker/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+    <script type="text/javascript" src="{% static "jquery-rating-star/rating.js" %}"></script>
+
+    <script src="{% static 'select2/js/select2.full.min.js' %}"></script>
+    <script>
+    let ratingScore = {{ form.rating.value }};
+    let inputRating = $('#id_rating');
+    let coverPreview = $('#cover-preview');
+    let inputCover = $('#id_cover');
+    let modalCreateTag = $('#tagCreateModal');
+    let modalCreateGenre = $('#genreCreateModal');
+    let btnShowCreateTagModal = $('#showCreateTagModal');
+    let btnShowCreateGenreModal = $('#showCreateGenreModal');
+    let inputTagName = $('#tag_name');
+    let inputGenreName = $('#genre_name');
+    let btnCreateTag  = $('#createTag');
+    let btnCreateGenre = $('#createGenre');
+
+    inputCover.on('change', function () {
+        if (this.files && this.files[0]){
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                coverPreview.attr('src', e.target.result);
+                coverPreview.show();
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+
+    });
+
+    btnShowCreateGenreModal.on('click', function () {
+        modalCreateGenre.modal('show');
+    });
+
+    btnShowCreateTagModal.on('click', function () {
+        modalCreateTag.modal('show');
+    });
+
+    function createTag(){
+        let tag_name = inputTagName.val();
+        if (tag_name.length === 0 || tag_name.length > 30) {
+            return $('#tag_hint_info').show();
+        } 
+        $.ajax({
+            url: `/movie/tag_create/${tag_name}`,
+            type: 'get',
+            success: function (result) {
+                if (result.action === 'update') {
+                    let option = new Option(result.data.name, result.data.id);
+                    option.selected = true;
+                    tagsSelect.append(option);
+                    tagsSelect.trigger('change');
+                }
+                modalCreateTag.modal('hide');
+                inputTagName.val('');
+            }
+        })
+
+    }
+    
+    function createGenre(){
+        let genre_name = inputGenreName.val();
+        if (genre_name.length === 0 || genre_name.length > 30) {
+            return $('#genre_hint_info').show();
+        } 
+        $.ajax({
+            url: `/movie/genre_create/${genre_name}`,
+            type: 'get',
+            success: function (result) {
+                if (result.action === 'update') {
+                    let option = new Option(result.data.name, result.data.id);
+                    option.selected = true;
+                    genresSelect.append(option);
+                    genresSelect.trigger('change');
+                }
+                modalCreateGenre.modal('hide');
+                inputGenreName.val('');
+            }
+        })
+
+    }
+
+    btnCreateGenre.on('click', function () {
+        createGenre();
+    });
+
+    btnCreateTag.on('click', function () {
+       createTag();
+    });
+
+    let genresSelect = $('#id_genres');
+    let tagsSelect= $('#id_tags');
+    $(document).ready(function () {
+        tagsSelect.select2({
+            placeholder: 'Add Tags',
+            allowClear: true,
+        });
+        genresSelect.select2({
+            placeholder: 'Add Genres',
+            allowClear: true,
+        });
+        inputCover.trigger('change');
+        $('<div class="row"><div id="rating-review"></div><span id="rating-preview"></span></div>').insertAfter(inputRating);
+        inputRating.hide();
+        let ratingButton = $("#rating-review");
+        let ratingPreview = $('#rating-preview');
+
+        ratingButton.rating({
+            half: true,
+            value: ratingScore,
+            "stars": 10,
+            click: function (e) {
+                ratingScore = e.stars;
+                ratingPreview.text(e.stars);
+                inputRating.attr('value', e.stars);
+            },
+        });
+
+
+    });
+
+    </script>
+{% endblock %}

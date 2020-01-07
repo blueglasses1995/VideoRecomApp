@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+{% block style %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'tempusdominus-datetime-picker/css/tempusdominus-bootstrap-4.min.css' %}" />
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+    <h1>Create Review</h1>
+        <hr>
+        <form action="" class="form" method="post" enctype="multipart/form-data" style="width: 835px;">
+            {% csrf_token %}
+            {% bootstrap_field form.title %}
+            {% bootstrap_field form.tags addon_after='<button class="btn btn-outline-primary" type="button" id="showCreateTagModal"><i class="fas fa-plus"></i></button>' addon_after_class=None %}
+            {% bootstrap_field form.content  show_label=False%}
+            {% buttons %}
+            <button type="submit" class="btn btn-primary" id="submit">Submit</button>
+            {% endbuttons %}
+        </form>
+    </div>
+    
+<div class="modal fade" id="tagCreateModal" tabindex="-1" role="dialog" aria-labelledby="tagCreateModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="TagCreateTitle">Create Tag</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <form action="" class="form"></form>
+          <div class="form-group">
+              <label for="tag_name">Tag Name</label>
+              <input class="form-control form-control-lg" id="tag_name" name="tag_name" required="" value="" type="text" placeholder="Tag Name" maxlength="30">
+              <p id="tag_hint_info" class="text-danger help-text" style="display: none;">Tag name must be filled and accept 1~30 characters.</p>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="createTag">Create Tag</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script src="{% static 'moment.js/moment-with-locales.min.js' %}"></script>
+    <script src="{% static 'tempusdominus-datetime-picker/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+    <script type="text/javascript" src="{% static "jquery-rating-star/rating.js" %}"></script>
+
+    <script src="{% static 'select2/js/select2.full.min.js' %}"></script>
+    <script>
+
+    let modalCreateTag = $('#tagCreateModal');
+    let btnShowCreateTagModal = $('#showCreateTagModal');
+    let inputTagName = $('#tag_name');
+    let btnCreateTag  = $('#createTag');
+
+    btnShowCreateTagModal.on('click', function () {
+        modalCreateTag.modal('show');
+    });
+
+    function createTag(){
+        let tag_name = inputTagName.val();
+        if (tag_name.length === 0 || tag_name.length > 30) {
+            return $('#tag_hint_info').show();
+        } 
+        $.ajax({
+            url: `/movie/tag_create/${tag_name}`,
+            type: 'get',
+            success: function (result) {
+                if (result.action === 'update') {
+                    let option = new Option(result.data.name, result.data.id);
+                    option.selected = true;
+                    tagsSelect.append(option);
+                    tagsSelect.trigger('change');
+                }
+                modalCreateTag.modal('hide');
+                inputTagName.val('');
+            }
+        })
+
+    }
+
+    btnCreateTag.on('click', function () {
+       createTag();
+    });
+
+    let tagsSelect= $('#id_tags');
+    $(document).ready(function () {
+        tagsSelect.select2({
+            placeholder: 'Add Tags',
+            allowClear: true,
+        });
+
+    });
+
+    </script>
+{% endblock %}

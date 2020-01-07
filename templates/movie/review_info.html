@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <div id="title" class="card bg-dark text-white">
+            <h1 class="text-center ">{{ review.title }}</h1>
+            <p class="text-center text-secondary">作者: {{ review.author.username }} 发布时间: {{ review.pub_date|date:'Y-m-d H:i:s' }} {% if review.edit_date %} 最后编辑: {{ review.edit_date|date:'Y-m-d H:i:s' }}{% endif %}</p>
+        </div>
+        <hr>
+        <div id="info" class="card bg-dark text-white">
+        <div class="card bg-dark" style="margin-left: 10px; margin-right: 10px;">
+            {{ review.content|safe }}
+        </div>
+        <table class="table table-bordered table-dark">
+            <tr>
+                <td width="120">标签</td>
+                <td>
+                    {% for tag in review.tags.all %}<a href="{% url 'movie:review_list' %}?tags={{ tag.id }}">{{ tag.name }}</a>{% empty %}无标签{% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td width="120">电影</td>
+                <td>
+                    {% for movie in review.movies.all %}<a href="{% url 'movie:movie_info' movie.id %}">{{ movie.title }}</a>{% empty %}无相关电影{% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button class="btn btn-outline-danger" title="Like" onclick="LikeReview({{ review.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ review.id }}_num">{{ review.likes }}</span></button>
+                    <button class="btn btn-outline-danger" title="Dislike" onclick="DislikeReview({{ review.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ review.id }}_num">{{ review.dislikes }}</span></button>
+                    <button class="btn btn-outline-warning" title="Favourite" onclick="FavouriteReview({{ review.id }})"><i class="fas fa-star"></i><span id="favourite_{{ review.id }}_num">{{ review.favourites }}</span></button>
+                    <a class="btn btn-outline-warning" title="Comment" href="#comments-area"><i class="fas fa-comment"></i><span id="comments_{{ review.id }}_num">{{ review.comments.count }}</span></a>
+
+                </td>
+            </tr>
+        </table>
+        </div>
+    <hr>
+    <div class="card bg-dark" id="comments-area">
+        <div class="row text-white-50 " >
+                <div class="col-2 text-center align-vert"><img src="{{ user.avatar_url }}" alt="{{ user.username }}" title="{{ user.username }}" class="img-fluid rounded-circle" width="120"><br><span>短评</span></div>
+                <div class="col-8 align-vert"><textarea name="comments" id="comments" class="form-control" required></textarea></div>
+                <div class="col-2 align-vert"><button class="btn btn-outline-primary btn-sm" type="button" onclick="PubComment()" title="Submit"><i class="fas fa-paper-plane"></i></button></div>
+    </div>
+    </div>
+
+    <hr>
+    <div id="comments-list">
+
+    {% for comment in comments.object_list %}
+        <div class="card bg-dark" style="margin-top: 5px;">
+            <div class="card-body">
+              <div class="row text-white-50" >
+                <div class="col-2 text-center align-vert"><div><img src="{{ comment.author.avatar_url }}" alt="" title="{{ comment.author.username }}" class="img-fluid rounded-circle" width="120"><br>
+                    <a href="{% url 'movie:user_profile_info' %}?user={{ comment.author.id }}"><span>{{ comment.author.username }}</span></a>
+                </div></div>
+                <div class="col-10">
+                    <p class="card-text">{{ comment.content|safe }}</p>
+                    <p class="text-secondary">{{ comment.pub_date|date:'Y-m-d H:i' }}</p>
+                    <p class="card-footer">
+                        <button class="btn btn-outline-primary btn-sm" title="Like" onclick="LikeComment({{ comment.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ comment.id }}_comment_num">{{ comment.likes }}</span></button>
+                        <button class="btn btn-outline-primary btn-sm" title="Dislike" onclick="DislikeComment({{ comment.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ comment.id }}_comment_num">{{ comment.dislikes }}</span></button>
+                        <button class="btn btn-outline-primary btn-sm" title="Dislike" onclick="FavouriteComment({{ comment.id }})"><i class="fas fa-star"></i><span id="favourite_{{ comment.id }}_comment_num">{{ comment.favourites }}</span></button>
+                    </p>
+                </div>
+              </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card bg-dark" style="margin-top: 5px;">
+            <div class="card-body">
+              <div class="row text-white-50" >
+                <p class="card-text">还没有短评</p>
+              </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% load bootstrap4 %}
+    {% if comments.has_other_pages %}
+        <div class="bg-dark" style="margin-top: 5px;">
+        {% bootstrap_pagination comments %}
+        </div>
+    {% endif %}
+    </div>
+    </div>
+
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script>
+    let commentEdit = $('#comments');
+    let csrf_token = "{{ csrf_token }}";
+
+    function LikeReview(review_id){
+        $.ajax({
+            url: `/movie/review_like/${review_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${review_id}_num`).text(result.likes);
+                $(`#dislike_${review_id}_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeReview(review_id){
+        $.ajax({
+            url: `/movie/review_dislike/${review_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${review_id}_num`).text(result.likes);
+                $(`#dislike_${review_id}_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteReview(review_id) {
+        $.ajax({
+            url: `/movie/review_favourite/${review_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${review_id}_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+
+    function LikeComment(comment_id){
+        $.ajax({
+            url: `/movie/comment_like/${comment_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${comment_id}_comment_num`).text(result.likes);
+                $(`#dislike_${comment_id}_comment_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeComment(comment_id){
+        $.ajax({
+            url: `/movie/comment_dislike/${comment_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${comment_id}_comment_num`).text(result.likes);
+                $(`#dislike_${comment_id}_comment_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteComment(comment_id) {
+        $.ajax({
+            url: `/movie/comment_favourite/${comment_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${comment_id}_comment_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+
+    function PubComment(){
+        let comment_content = commentEdit.val();
+        console.log(comment_content);
+        if (comment_content.length < 10) {
+            return $.toast({
+                content: 'Comment should contains 10 chars',
+                title: 'Content is too short',
+                type: 'warning',
+                delay: 5000
+            })
+        } else if (comment_content.length > 1000){
+            return $.toast({
+                content: 'Comment should contains 1000 chars at most',
+                title: 'Too Much Content',
+                type: 'warning',
+                delay: 5000
+            })
+        } else {
+            $.ajax({
+                url: window.location.href,
+                data: {
+                    csrfmiddlewaretoken: csrf_token,
+                    comments: comment_content
+                },
+                type: 'post',
+                success: function (result) {
+                    if (result.status === 'success'){
+                        commentEdit.val('');
+                        $.toast({
+                            content: '短评发表成功',
+                            title: '消息',
+                            type: 'success',
+                            delay: 5000
+                        });
+                        setTimeout(function () {
+                            if (window.location.hash !== ''){
+                               window.location.assign( window.location.href.slice(0, (window.location.href.length - location.hash.length))+'#comments-list');
+                                window.location.reload();
+                            } else{
+                                window.location.assign(window.location.href+'#comments-list');
+                            }
+
+                        }, 500)
+                    }
+                },
+                error: function (data) {
+                    $.toast({
+                        content: '发表短评失败',
+                        title: '注意',
+                        type: 'warning',
+                        delay: 5000
+                    })
+                }
+            })
+        }
+    }
+
+    let ratingButton = $("#rating-review");
+    let ratingPreview = $('#rating-preview');
+
+    $(document).ready(function () {
+
+    });
+
+
+
+    </script>
+{% endblock %}

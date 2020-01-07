@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+
+{% block content %}
+<div class="container">
+<h1 class="text-center">{{ title }}</h1>
+    <hr>
+
+<form action="" method="post" class="form">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  {% buttons %}
+    <button type="submit" class="btn btn-primary">
+      Submit
+    </button>
+  {% endbuttons %}
+</form>
+</div>
+{% endblock content %}
+
+
+{% block script %}
+    <script>
+    let lead_result_a = $('#id_lead_result_a');
+    let lead_result_b = $('#id_lead_result_b');
+    let lead_result_c = $('#id_lead_result_c');
+    let air_result_a = $('#id_air_result_a');
+    let air_result_b = $('#id_air_result_b');
+    let air_result_c = $('#id_air_result_c');
+
+    let result_type = $('#id_result_type');
+    
+    result_type.on('change', SelectChange);
+    
+    function SelectChange(e) {
+        console.log(result_type.val());
+        if (result_type.val() === 'LEAD'){
+            lead_result_a.parent().show();
+            lead_result_b.parent().show();
+            lead_result_c.parent().show();
+            air_result_a.parent().hide();
+            air_result_b.parent().hide();
+            air_result_c.parent().hide();
+            
+            lead_result_a.prop('required', true);
+            lead_result_b.prop('required', true);
+            lead_result_c.prop('required', true);
+            air_result_a.removeAttr('required');
+            air_result_b.removeAttr('required');
+            air_result_c.removeAttr('required');
+            
+
+        } else if (result_type.val() === 'AIR'){
+            lead_result_a.parent().hide();
+            lead_result_b.parent().hide();
+            lead_result_c.parent().hide();
+            air_result_a.parent().show();
+            air_result_b.parent().show();
+            air_result_c.parent().show();
+            
+            lead_result_a.removeAttr('required');
+            lead_result_b.removeAttr('required');
+            lead_result_c.removeAttr('required');
+            air_result_a.prop('required', true);
+            air_result_b.prop('required', true);
+            air_result_c.prop('required', true);
+            
+        } else {
+            lead_result_a.parent().hide();
+            lead_result_b.parent().hide();
+            lead_result_c.parent().hide();
+            air_result_a.parent().hide();
+            air_result_b.parent().hide();
+            air_result_c.parent().hide();
+
+            lead_result_a.removeAttr('required');
+            lead_result_b.removeAttr('required');
+            lead_result_c.removeAttr('required');
+            air_result_a.removeAttr('required');
+            air_result_b.removeAttr('required');
+            air_result_c.removeAttr('required');
+        }
+    }
+    $(document).ready(function () {
+        SelectChange();
+    })
+    </script>
+{% endblock %}

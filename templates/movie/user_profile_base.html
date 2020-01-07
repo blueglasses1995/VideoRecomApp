@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="text-center">{% if profile_title %}{{ profile_title }}{% else %}用户资料{% endif %}</h1>
+        <hr>
+    <div class="row">
+        <div class="col-md-2">
+            <div class="list-group bg-dark">
+                <a href="{% url 'movie:user_profile_info' %}?user={{ the_user.id }}" class="bg-dark list-group-item list-group-item-action{% if action == 'user_info' %} active{% else %} text-white-50{% endif %}">影迷资料</a>
+                <a href="{% url 'movie:user_profile_favourite_movies' %}?user={{ the_user.id }}" class="bg-dark list-group-item list-group-item-action{% if action == 'movies_favourite' %}  active{% else %} text-white-50{% endif %}">收藏的电影</a>
+                <a href="{% url 'movie:user_profile_favourite_reviews' %}?user={{ the_user.id }}" class="bg-dark list-group-item list-group-item-action{% if action == 'reviews_favourite' %}  active{% else %} text-white-50{% endif %}">收藏的影评</a>
+                <a href="{% url 'movie:user_profile_published_reviews' %}?user={{ the_user.id }}" class="bg-dark list-group-item list-group-item-action{% if action == 'reviews_published' %}  active{% else %} text-white-50{% endif %}">发表的影评</a>
+                <a href="{% url 'movie:user_profile_favourite_users' %}?user={{ the_user.id }}" class="bg-dark list-group-item list-group-item-action{% if action == 'user_friends' %}  active{% else %} text-white-50{% endif %}">关注的影迷</a>
+                {% if from_user == 'me' %}
+                <a href="{% url 'movie:user_profile_notices' %}?user={{ the_user.id }}" class="bg-dark list-group-item list-group-item-action{% if action == 'user_notices' %}  active{% else %} text-white-50{% endif %}">我的消息</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-10">
+            {% block user_profile_content %}{% endblock %}
+        </div>
+    </div>
+    </div>
+{% endblock %}

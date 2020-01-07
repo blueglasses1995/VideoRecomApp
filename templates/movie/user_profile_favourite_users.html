@@ -1,0 +1,92 @@
+{% extends 'movie/user_profile_base.html' %}
+
+{% block user_profile_content %}
+    <div id="reviews">
+    <div class="row">
+        {% for profile in friends.object_list %}
+            <div class="col-md-3" style="margin-top: 5px;margin-bottom: 5px;">
+            <div class="card bg-dark">
+                <img src="{{ profile.me.user.avatar_url }}" alt="" class="card-img-top">
+                <div class="card-body">
+                    <h5>
+                        <a href="{% url 'movie:user_profile_info' %}?user={{ profile.me.user.id }}">{{ profile.me.user.username }}</a>
+                    </h5>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline-danger btn-sm" title="点赞" onclick="LikeProfile({{ profile.me.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ profile.me.id }}_num">{{ profile.me.friends_like.count }}</span></button>
+                    <button class="btn btn-outline-danger btn-sm" title="拍砖" onclick="DislikeProfile({{ profile.me.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ profile.me.id }}_num">{{ profile.me.friends_dislike.count }}</span></button>
+                    <button class="btn btn-outline-warning btn-sm" title="关注" onclick="FavouriteProfile({{ profile.me.id }})"><i class="fas fa-star"></i><span id="favourite_{{ profile.me.id }}_num">{{ profile.me.friends_favourite.count }}</span></button>
+
+                </div>
+            </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-white-50 col-12">{{ the_user.username }} 没有关注任何影迷</p>
+        {% endfor %}
+    </div>
+    {% load bootstrap4 %}
+    {% if friends.has_other_pages %}
+        <div class="bg-dark" style="margin-top: 5px;">
+        {% bootstrap_pagination friends %}
+        </div>
+    {% endif %}
+    </div>
+
+    </div>
+{% endblock %}
+
+
+{% block script %}
+    {{ block.super }}
+    {% load static %}
+    <script type="text/javascript" src="{% static "jquery-rating-star/rating.js" %}"></script>
+    <script>
+    function LikeProfile(profile_id){
+        $.ajax({
+            url: `/movie/profile_like/${profile_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${profile_id}_num`).text(result.likes);
+                $(`#dislike_${profile_id}_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeProfile(profile_id){
+        $.ajax({
+            url: `/movie/profile_dislike/${profile_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${profile_id}_num`).text(result.likes);
+                $(`#dislike_${profile_id}_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteProfile(profile_id) {
+        $.ajax({
+            url: `/movie/profile_favourite/${profile_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${profile_id}_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+    </script>
+{% endblock %}

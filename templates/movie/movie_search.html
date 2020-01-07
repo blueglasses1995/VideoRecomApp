@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h1 class="text-center">电影列表</h1>
+        <hr>
+    <div id="search">
+        <table class="table table-borderless">
+            <tr>
+                <td width="120">类型</td>
+                <td>
+                    <div class="d-flex flex-wrap">
+                        {% for genre in genres %}
+                            <button class="btn btn-outline-primary btn-sm" data-value="{{ genre.id }}" id="genre-{{ genre.id }}" data-chosen="false" onclick="chooseThis(this, 'genre')" style="margin: 5px;">{{ genre.name }}</button>
+                            {% empty %}
+                            <span>没有找到类别</span>
+                        {% endfor %}
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>标签</td>
+                <td>
+                    <div class="d-flex flex-wrap">
+                    {% for tag in tags %}
+                            <button class="btn btn-outline-primary btn-sm" data-value="{{ tag.id }}" id="tag-{{ tag.id }}" data-chosen="false" onclick="chooseThis(this, 'tag')" style="margin: 5px;">{{ tag.name }}</button>
+                            {% empty %}
+                            <span>没有找到标签</span>
+                        {% endfor %}
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>年份</td>
+                <td>
+                    <div class="d-flex flex-wrap">
+                    {% for year in years %}
+                            <button class="btn btn-outline-primary btn-sm" data-value="{{ year.year }}" id="year-{{ year.year }}" data-chosen="false" onclick="chooseThis(this, 'year')" style="margin: 5px;">{{ year.year }}</button>
+                            {% empty %}
+                            <span>没有找到标签</span>
+                        {% endfor %}
+                    </div>
+                </td>
+            </tr>
+        <tr>
+            <td>关键词</td>
+            <td><input type="text" placeholder="关键词" id="accept"></td>
+        </tr>
+        <tr>
+            <td>排除</td>
+            <td><input type="text" placeholder="排除的关键词" id="exclude"></td>
+        </tr>
+        <tr>
+            <td colspan="2"><button class="btn btn-primary" onclick="doSearch()">搜索</button></td>
+
+        </tr>
+        </table>
+
+        </div>
+    <div id="movies-list">
+    <div class="row">
+        {% for movie in movies.object_list %}
+            <div class="col-md-6" style="margin-top: 5px;margin-bottom: 5px;">
+            <div class="card bg-dark">
+                <img src="{{ movie.cover.url }}" alt="" class="card-img-top">
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <h5><a href="{% url 'movie:movie_info' movie.id %}">{{ movie.title }} ({{ movie.year }})</a></h5>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="row">
+                            <div class=rating-review" data-rating-stars="10" data-rating-readonly="true" data-rating-half="true" data-rating-value="{{ movie.rating }}"></div>
+                            <span class="badge-danger badge-pill text-warning" id="rating-preview">{{ movie.rating }}</span></div>
+                            </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div >
+                        <div class="float-left">
+                            <button class="btn btn-outline-danger btn-sm" title="点赞" onclick="LikeMovie({{ movie.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ movie.id }}_num">{{ movie.likes }}</span></button>
+                            <button class="btn btn-outline-danger btn-sm" title="拍砖" onclick="DislikeMovie({{ movie.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ movie.id }}_num">{{ movie.dislikes }}</span></button>
+                            <a class="btn btn-outline-danger btn-sm" title="查看影评" href=""><i class="fas fa-comment"></i><span id="comments_{{ movie.id }}_num">{{ movie.reviews.count }}</span></a>
+                        </div>
+                        <div class="float-right">
+                            <button class="btn btn-outline-warning btn-sm" title="收藏" onclick="FavouriteMovie({{ movie.id }})"><i class="fas fa-star"></i><span id="favourite_{{ movie.id }}_num">{{ movie.favourites }}</span></button>
+                            <button class="btn btn-outline-warning btn-sm" title="观看" onclick="WatchMovie({{ movie.id }})"><i class="fas fa-film"></i><span id="watch_{{ movie.id }}_num">{{ movie.watches }}</span></button>
+                        </div>
+                        </div>
+
+                </div>
+            </div>
+            </div>
+        {% empty %}
+            <a href="{% url 'movie:movie_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> 登记一部电影</a>
+        {% endfor %}
+    </div>
+    {% load bootstrap4 %}
+    {% if movies.has_other_pages %}
+        <div class="bg-dark" style="margin-top: 5px;">
+        {% bootstrap_pagination movies %}
+        </div>
+    {% endif %}
+    </div>
+
+    </div>
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    {% load static %}
+    <script type="text/javascript" src="{% static "jquery-rating-star/rating.js" %}"></script>
+    <script>
+    let year_chosen = [];
+    let tag_chosen = [];
+    let genres_chosen = [];
+    let accept = '';
+    let exclude = '';
+    function WatchMovie(movie_id) {
+        $.ajax({
+            url: `/movie/movie_watch/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#watch_${movie_id }_num`).text(result.watches);
+                $.toast({
+                    content: '跳转中...',
+                    type: 'info',
+                    delay: 5000
+                });
+                setTimeout(function () {
+                    window.location.assign(result.url);
+                }, 1500)
+            }
+        })
+    }
+
+    function LikeMovie(movie_id){
+        $.ajax({
+            url: `/movie/movie_like/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${movie_id}_num`).text(result.likes);
+                $(`#dislike_${movie_id}_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeMovie(movie_id){
+        $.ajax({
+            url: `/movie/movie_dislike/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${movie_id}_num`).text(result.likes);
+                $(`#dislike_${movie_id}_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteMovie(movie_id) {
+        $.ajax({
+            url: `/movie/movie_favourite/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${movie_id}_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+    function placeHolder() {
+
+    }
+    function chooseThis(e, name) {
+        let value = e.getAttribute('data-value');
+        let chosen = e.getAttribute('data-chosen');
+        if (chosen === 'true'){
+            e.setAttribute('data-chosen', 'false');
+            e.classList.add("btn-outline-primary");
+            e.classList.remove("btn-primary");
+        } else if (chosen === 'false'){
+            e.setAttribute('data-chosen', 'true');
+            e.classList.remove("btn-outline-primary");
+            e.classList.add("btn-primary");
+        }
+        updateChosenValues(name, value);
+    }
+    function updateChosenValues(name, value) {
+        console.log(name, value);
+        if (name === 'year'){
+            if (year_chosen.includes(value)){
+                year_chosen = year_chosen.filter(item => item !== value)
+            } else {
+                year_chosen.push(value)
+            }
+            console.log(name, year_chosen)
+        } else if (name === 'tag') {
+            if (tag_chosen.includes(value)){
+                tag_chosen = tag_chosen.filter(item => item !== value)
+            } else {
+                tag_chosen.push(value)
+            }
+            console.log(name, tag_chosen)
+        } else if (name === 'genre'){
+            if (genres_chosen.includes(value)){
+                genres_chosen = genres_chosen.filter(item => item !== value)
+            } else {
+                genres_chosen.push(value)
+            }
+            console.log(name, genres_chosen)
+        } else {
+
+        }
+    }
+    function doSearch() {
+        accept = $('#accept').val();
+        exclude = $('#exclude').val();
+        genres_chosen = genres_chosen.filter(item => item !== '');
+        tag_chosen = tag_chosen.filter(item => item !== '');
+        year_chosen = year_chosen.filter(item => item !== '');
+        let url = `/movie/movie_search?tags=${tag_chosen.join()}&genres=${genres_chosen.join()}&years=${year_chosen.join()}&accept=${accept}&exclude=${exclude}`;
+        console.log(url);
+        window.location.assign(url);
+    }
+
+    function getP(name, default_var) {
+        let qs = new URLSearchParams(window.location.search);
+        if (qs.has(name)) {
+            return qs.get(name)
+        } else {
+            return default_var
+        }
+    }
+
+    $(document).ready(function () {
+        tag_chosen = getP('tags', '');
+        tag_chosen = tag_chosen.split(',');
+        tag_chosen.forEach(function (v, i) {
+            let e = document.getElementById(`tag-${v}`);
+            if (e !== null){
+                e.setAttribute('data-chosen', 'true');
+                e.classList.remove("btn-outline-primary");
+                e.classList.add("btn-primary");
+            }
+        });
+        year_chosen = getP('years', '');
+        year_chosen = year_chosen.split(',');
+        year_chosen.forEach(function (v, i) {
+            let e = document.getElementById(`year-${v}`);
+            if (e !== null){
+                e.setAttribute('data-chosen', 'true');
+                e.classList.remove("btn-outline-primary");
+                e.classList.add("btn-primary");
+            }
+        });
+        genres_chosen = getP('genres', '');
+        genres_chosen = genres_chosen.split(',');
+        genres_chosen.forEach(function (v, i) {
+            let e = document.getElementById(`genre-${v}`);
+            if (e !== null){
+                e.setAttribute('data-chosen', 'true');
+                e.classList.remove("btn-outline-primary");
+                e.classList.add("btn-primary");
+            }
+        });
+        accept = getP('accept', '');
+        exclude = getP('exclude', '');
+        $('#accept').val(accept);
+        $('#exclude').val(exclude);
+
+    })
+    </script>
+{% endblock %}

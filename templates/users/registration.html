@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% load bootstrap4 %}
+
+{% block style %}
+    {{ block.super }}
+<link rel="stylesheet" href="{% static 'croppie/croppie.css' %}" />
+    <link rel="stylesheet" href="{% static 'tempusdominus-datetime-picker/css/tempusdominus-bootstrap-4.min.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<h1 class="text-center">User Register</h1>
+
+<form action="" method="post" class="form" enctype="multipart/form-data">
+  {% csrf_token %}
+{#  {% bootstrap_form form %}#}
+{% bootstrap_field form.avatar_thumbnail %}
+{% bootstrap_field form.username %}
+{% bootstrap_field form.email %}
+<div class="row">
+    <div class="col-md-6">
+    {% bootstrap_field form.avatar %}
+    </div>
+
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-8">
+        <div id="avatar-crop" style="display: none;"></div>
+                <img id="avatar-preview" src="{% static 'image/default_avatar.png' %}" alt="" class="img-fluid" width="300">
+                </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-outline-primary" id="avatar-check" style="display: none"><i class="fas fa-check"></i></button>
+                <button type="button" class="btn btn-outline-warning" id="avatar-edit" style="display: none"><i class="fas fa-pen"></i></button>
+            </div>
+            </div>
+
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-md-4">{% bootstrap_field form.first_name %}</div>
+    <div class="col-md-4">{% bootstrap_field form.last_name %}</div>
+    <div class="col-md-4">{% bootstrap_field form.birth %}</div>
+</div>
+
+{% bootstrap_field form.password1 %}
+{% bootstrap_field form.password2 %}
+  {% buttons %}
+      <button type="submit" class="btn btn-primary" id="submit">
+      Submit
+    </button>
+  {% endbuttons %}
+
+</form>
+<p class="text-info">Got An Account Already? Just <a href="/login">Sign In</a>!</p>
+
+
+</div>
+{% endblock content %}
+{% block script %}
+    {{ block.super }}
+    <script src="{% static 'moment.js/moment-with-locales.min.js' %}"></script>
+    <script src="{% static 'tempusdominus-datetime-picker/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+
+    <script src="{% static 'croppie/croppie.js' %}"></script>
+    <script>
+    let avatarThumbnail = $('#id_avatar_thumbnail');
+    let avatarInput = $('#id_avatar');
+    let avatarPreview = $('#avatar-preview');
+    let btnAvatarCheck = $('#avatar-check');
+    let btnAvatarEdit = $('#avatar-edit');
+    let btnSubmit = $('#submit');
+    let avatarCrop = $('#avatar-crop').croppie({
+        enableExif: true,
+        viewport: {
+            width: 200,
+            height: 200,
+            type: 'circle'
+        },
+        boundary: {
+            width: 300,
+            height: 300
+        }
+    });
+
+    avatarInput.on('change', function () {
+        readFile(this);
+    });
+
+    function readFile(input) {
+        if (input.files && input.files[0]){
+            avatarCrop.show();
+            btnAvatarCheck.show();
+            btnAvatarEdit.hide();
+            avatarPreview.hide();
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+
+	            	avatarCrop.croppie('bind', {
+	            		url: e.target.result
+	            	}).then(function(){
+	            		console.log('jQuery bind complete');
+	            	});
+
+	            };
+	        reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function keepCrop() {
+
+        avatarCrop.croppie('result', {
+                type: 'rawcanvas',
+                circle: false,
+                // size: { width: 300, height: 300 },
+                format: 'png'
+            }).then(function (canvas) {
+                let i = canvas.toDataURL();
+                avatarPreview.attr('src', i);
+                avatarThumbnail.val(i);
+                avatarPreview.show();
+                avatarCrop.hide();
+                btnAvatarEdit.show();
+                btnAvatarCheck.hide();
+            })
+    }
+
+    btnAvatarCheck.on('click', function () {
+        keepCrop();
+    });
+
+    btnAvatarEdit.on('click', function () {
+        btnAvatarEdit.hide();
+        btnAvatarCheck.show();
+        avatarPreview.hide();
+        avatarCrop.show();
+
+    });
+
+    </script>
+{% endblock %}

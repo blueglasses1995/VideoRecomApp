@@ -1,0 +1,244 @@
+{% extends 'movie/user_profile_base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+{% block style %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'croppie/croppie.css' %}" />
+    <link rel="stylesheet" href="{% static 'tempusdominus-datetime-picker/css/tempusdominus-bootstrap-4.min.css' %}" />
+{% endblock %}
+{% block user_profile_content %}
+    {% if from_user == 'me' %}
+        <form action="" enctype="multipart/form-data" method="post">
+        {% bootstrap_field form.avatar_thumbnail %}
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-4">
+                <div class="row">
+                    <div style="display: none" id="show_avatar_input">
+                    {% bootstrap_field form.avatar %}
+                    </div>
+                    <div id="avatar-crop" style="display: none;"></div>
+                    <div class="card" style="background: transparent;border: none;">
+                        <div class="card-img">
+                            <img id="avatar-preview" src="{{ the_user.avatar_url }}" alt="" class="img-fluid rounded-circle" width="300">
+                        </div>
+
+                        <div class="card-img-overlay float-right">
+                            <button type="button" class="btn btn-outline-warning btn-sm float-md-right" id="avatar-edit" style=""><i class="fas fa-pen"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center" id="stars">
+                    <button class="btn btn-outline-success btn-sm" type="button" title="点赞"><i class="fas fa-thumbs-up"></i><span id="like_{{ the_user.profile.id }}_num">{{ the_user.profile.friends_like.count }}</span></button>
+                    <button class="btn btn-outline-danger btn-sm"  type="button" title="拍砖"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ the_user.profile.id }}_num">{{ the_user.profile.friends_dislike.count }}</span></button>
+                    <button class="btn btn-outline-warning btn-sm"  type="button" title="关注"><i class="fas fa-star"></i><span id="favourite_{{ the_user.profile.id }}_num">{{ the_user.profile.friends_favourite.count }}</span></button>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="avatar-check" style="display: none"><i class="fas fa-check"></i></button>
+                </div>
+
+            </div>
+            <div class="col-md-8">
+                {% bootstrap_field form.username %}
+                {% bootstrap_field form.email %}
+                {% bootstrap_field form.first_name %}
+                {% bootstrap_field form.last_name %}
+                {% bootstrap_field form.birth %}
+                {% buttons %}<button type="submit" class="btn btn-primary" id="submit">保存</button>{% endbuttons %}
+            </div>
+        </div>
+
+        </form>
+    {% else %}
+        <div class="row">
+        <div class="col-md-4 text-center">
+            <img src="{{ the_user.avatar_url }}" alt="" width="120" class="img-fluid rounded-circle">
+            <p class="align-horizontal-center">
+            <button class="btn btn-outline-danger btn-sm" title="点赞" onclick="LikeProfile({{ the_user.profile.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ the_user.profile.id }}_num">{{ the_user.profile.friends_like.count }}</span></button>
+            <button class="btn btn-outline-danger btn-sm" title="拍砖" onclick="DislikeProfile({{ the_user.profile.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ the_user.profile.id }}_num">{{ the_user.profile.friends_dislike.count }}</span></button>
+            <button class="btn btn-outline-warning btn-sm" title="关注" onclick="FavouriteProfile({{ the_user.profile.id }})"><i class="fas fa-star"></i><span id="favourite_{{ the_user.profile.id }}_num">{{ the_user.profile.friends_favourite.count }}</span></button>
+            </p>
+        </div>
+        <div class="col-md-8">
+            <table class="table table-borderless">
+                <tr>
+                    <td width="120">用户名</td>
+                    <td>{{ the_user.username }}</td>
+                </tr>
+                <tr>
+                    <td>姓名</td>
+                    <td>{{ the_user.get_full_name }}</td>
+                </tr>
+                <tr>
+                    <td>邮箱</td>
+                    <td><a href="mailto:{{ the_user.email }}">{{ the_user.email }}</a></td>
+                </tr>
+                <tr>
+                    <td>生日</td>
+                    <td>{{ the_user.birth }}</td>
+                </tr>
+            </table>
+        </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+{% if from_user == 'me' %}
+
+    {{ block.super }}
+    <script src="{% static 'moment.js/moment-with-locales.min.js' %}"></script>
+    <script src="{% static 'tempusdominus-datetime-picker/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script src="{% static 'croppie/croppie.js' %}"></script>
+    <script>
+    let stars = $('#stars');
+    let avatar_origin_url = "{{ the_user.avatar.url }}";
+    let avatar_input_show = $('#show_avatar_input');
+    let avatarThumbnail = $('#id_avatar_thumbnail');
+    let avatarInput = $('#id_avatar');
+    let avatarPreview = $('#avatar-preview');
+    let btnAvatarCheck = $('#avatar-check');
+    let btnAvatarEdit = $('#avatar-edit');
+    let btnSubmit = $('#submit');
+    let avatarCrop = $('#avatar-crop').croppie({
+        enableExif: true,
+        viewport: {
+            width: 200,
+            height: 200,
+            type: 'circle'
+        },
+        boundary: {
+            width: 300,
+            height: 300
+        }
+    });
+    avatarInput.on('change', function () {
+        avatar_origin_url = null;
+        readFile(this);
+    });
+
+    function readFile(input) {
+        if (input !== 'yes' && input.files && input.files[0]){
+            avatarCrop.show();
+            btnAvatarCheck.show();
+            btnAvatarEdit.hide();
+            avatarPreview.hide();
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+
+	            	avatarCrop.croppie('bind', {
+	            		url: e.target.result
+	            	}).then(function(){
+	            		console.log('jQuery bind complete');
+	            	});
+
+	            };
+	        reader.readAsDataURL(input.files[0]);
+        } else if (avatar_origin_url !== null){
+            avatarCrop.croppie('bind', {
+	            		url: avatar_origin_url
+	            	}).then(function(){
+	            		console.log('jQuery bind complete to avatar_origin_url');
+	            	});
+        }
+    }
+
+    function keepCrop() {
+
+        avatarCrop.croppie('result', {
+                type: 'rawcanvas',
+                circle: false,
+                // size: { width: 300, height: 300 },
+                format: 'png'
+            }).then(function (canvas) {
+                let i = canvas.toDataURL();
+                avatarPreview.attr('src', i);
+                avatarThumbnail.val(i);
+                avatarPreview.show();
+                avatarCrop.hide();
+                btnAvatarEdit.show();
+                btnAvatarCheck.hide();
+            })
+    }
+
+    btnAvatarCheck.on('click', function () {
+        keepCrop();
+        avatar_input_show.hide();
+        stars.show();
+    });
+
+    btnAvatarEdit.on('click', function () {
+        btnAvatarEdit.hide();
+        btnAvatarCheck.show();
+        avatarPreview.hide();
+        avatarCrop.show();
+        avatar_input_show.show();
+        stars.hide();
+        readFile('yes');
+    });
+
+    $(document).ready(function () {
+        $('#id_username').prop('readonly', true);
+        $('#id_email').prop('readonly', true);
+    })
+
+
+    </script>
+
+    {% else %}
+
+    <script>
+        {{ block.super }}
+    function LikeProfile(profile_id){
+        $.ajax({
+            url: `/movie/profile_like/${profile_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${profile_id}_num`).text(result.likes);
+                $(`#dislike_${profile_id}_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeProfile(profile_id){
+        $.ajax({
+            url: `/movie/profile_dislike/${profile_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${profile_id}_num`).text(result.likes);
+                $(`#dislike_${profile_id}_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteProfile(profile_id) {
+        $.ajax({
+            url: `/movie/profile_favourite/${profile_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${profile_id}_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+    </script>
+
+{% endif %}
+{% endblock %}

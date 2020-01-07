@@ -1,88 +1,110 @@
-<!doctype html>
-<html lang="ja" xmlns="">
-    <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>トップページ</title>
+{% extends '_layout.html' %}
+{% load static %}
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"/>
 
-    </head>
+{% block nav %}
 
-    <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-fixed-top">
-          <a class="navbar-brand" href="/">トップページ</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<div class="container">
+    <a class="navbar-brand" href="#">
+{#        <i class="fas fa-film"></i>#}
+        <img src="{% static 'image/logo.png' %}" alt="logo" class="img-fluid" width="100">
+    </a>
 
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
-                <a class="nav-link" href="/">作品一覧<span class="sr-only">(current)</span></a>
-              </li>
-              <li class="nav-item active">
-                <a class="nav-link" href="/movie/search/">作品検索<span class="sr-only">(current)</span></a>
-              </li>
-              <li class="nav-item active">
-                <a class="nav-link" href="/article/">記事<span class="sr-only">(current)</span></a>
-              </li>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-            {% if user.is_authenticated %}
-              <li class="nav-item active">
-                <a class="nav-link" href="/post/create_view/">新規投稿<span class="sr-only">(current)</span></a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/recommendation/">口コミ</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/profile/{{ login_user.pk }}/">マイページ</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  アカウント
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="/post/view_liked_post/">いいねした投稿</a>
-                <a class="dropdown-item" href="/movie/view_liked_movie/">お気に入りの映画</a>
-                  <a class="dropdown-item" href="#">フォローリスト</a>
-                  <a class="dropdown-item" href="#">フォロワーリスト</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">設定</a>
+    <div class="collapse navbar-collapse" id="navbarColor02">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown-kit" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-film"></i> 电影</a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown-kit">
+                {% if user.is_superuser %}<a class="dropdown-item" href="{% url 'movie:movie_create' %}"><i class="fas fa-plus-circle"></i> 登记电影</a>{% endif %}
+                <a class="dropdown-item" href="{% url 'movie:movie_list' %}"><i class="fas fa-list"></i> 所有电影</a>
+            </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown-result" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-scroll"></i> 影评</a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown-result">
+                <a class="dropdown-item" href="{% url 'movie:review_create' %}"><i class="fas fa-plus-circle"></i> 撰写影评</a>
+                <a class="dropdown-item" href="{% url 'movie:review_list' %}"><i class="fas fa-list"></i> 所有影评</a>
+            </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link " href="{% url 'movie:movie_search' %}" id="navbarDropdown-post"><i class="fas fa-search"></i> 搜索</a>
+        </li>
+
+      </ul>
+      <ul class="navbar-nav float-right">
+          {% if user.is_authenticated %}
+              <li class="nav-item"><a href="{% url 'movie:user_profile_notices' %}?only=new" class="nav-link"><i class="fas fa-bell"></i> <span class="badge-success badge-pill" id="new-notice-num" style="display: none">5</span></a></li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown-user" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+               欢迎 <img src="{{ user.avatar_url }}" alt="" class="img-fluid rounded-circle" width="30"> {{ user.username }}</a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown-user">
+                    {% if user.is_superuser %}<a class="dropdown-item" href="/admin"><i class="fas fa-user-shield"></i> Goto Admin</a>{% endif %}
+                    <a class="dropdown-item" href="{% url 'users:password_change' %}"><i class="fas fa-key"></i> 修改密码</a>
+                    <a class="dropdown-item" href="{% url 'movie:user_profile_info' %}"><i class="fas fa-user-cog"></i> 我的档案</a>
+                    <a class="dropdown-item" href="{% url 'movie:user_profile_notices' %}"><i class="fas fa-envelope"></i> 我的通知</a>
+                    <a class="dropdown-item" href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt"></i> 退出</a>
                 </div>
-              </li>
-            {% endif %}
+            </li>
 
-            </ul>
-            {% if user.is_authenticated %}
-                <h5>{{ login_user.username }}さん</h5>
-            {% endif %}
+              {% else %}
+              <li class="nav-item"><span class="navbar-text">欢迎光临本站</span></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'users:login' %}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'users:register' %}"><i class="fas fa-user-plus"></i> Register</a></li>
+          {% endif %}
+      </ul>
+    </div>
+</div>
+     </nav>
+{% endblock nav %}
+{% block messages %}
+    {% load bootstrap4 %}
+    <div class="container">
+    {% bootstrap_messages %}
+    </div>
+{% endblock messages %}
 
-            {% if user.is_authenticated %}
-                <span class="navbar-text"><a href="/logout" class="btn btn-primary">ログアウト</a></span>
-            {% else %}
-                <span class="navbar-text"><a href="/register/create_user_view" class="btn btn-primary">会員登録</a></span>
-                <span class="navbar-text"><a href="/accounts/login/" class="btn btn-primary">ログイン</a></span>
-            {% endif %}
-
-<!--
-            <form class="form-inline my-2 my-lg-0">
-              <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
--->
+{% block footer %}
+<footer class="footer text-danger">
+      <div class="container">
+          <div class="row">
+              <div class="col-md-6"><i class="fas fa-film"></i> Movie Recommend</div>
+              <div class="col-md-6 d-none d-md-block d-lg-block"><span class="float-right ">Django <i class="fa fa-fw fa-copyright"></i>2019</span></div>
           </div>
-        </nav>
+      </div>
+</footer>
+{% endblock footer %}
 
-        <div class="jumbotron">
-        {% block header %}
-        {% endblock header %}
-        </div>
-        {% block content %}
-        {% endblock content %}
+{% block script_notice %}
+    <script>
+    let newNoticeNumDisplay = $('#new-notice-num');
+    function getNumOfNewNotices() {
+        $.ajax({
+            url: "{% url 'movie:get_new_notices_num' %}",
+            type: 'get',
+            success: function (result) {
+                newNoticeNumDisplay.text(result.notices_num);
 
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"　integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"　crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    </body>
-<html/>
+                if (result.notices_num > 0){
+                    newNoticeNumDisplay.show();
+                } else {
+                    newNoticeNumDisplay.hide();
+                }
+
+                setTimeout(getNumOfNewNotices, 2000);
+            },
+            error: function (msg) {
+                setTimeout(getNumOfNewNotices, 2000);
+            }
+        });
+
+    }
+    $(document).ready(function () {
+        getNumOfNewNotices();
+    })
+    </script>
+{% endblock %}

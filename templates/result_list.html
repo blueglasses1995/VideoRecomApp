@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+
+{% load helper %}
+
+{% block content %}
+<div class="container">
+<h1 class="text-center">{{ title }}</h1>
+    <hr>
+        {% if kits.start_index %}
+        <table class="table table-hover table-striped table-bordered">
+        <thead>
+        <tr class="text-center">
+            <th>#</th>
+            <th>Result Type</th>
+            <th>Lead Result A</th>
+            <th>Lead Result B</th>
+            <th>Lead Result C</th>
+            <th>Air Result A</th>
+            <th>Air Result B</th>
+            <th>Air Result C</th>
+            <th>Pub Date</th>
+            <th>Last modified</th>
+            {% if user.is_superuser %}<th>Uploader</th>{% endif %}
+            <td>Options</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for task in kits.object_list %}
+        <tr class="text-center">
+
+            <td>{% calc_index kits.start_index loop_index0=forloop.counter0 %}</td>
+            <td>{{ task.result_type }}</td>
+            <td>{{ task.lead_result_a }}</td>
+            <td>{{ task.lead_result_b }}</td>
+            <td>{{ task.lead_result_c }}</td>
+            <td>{{ task.air_result_a }}</td>
+            <td>{{ task.air_result_b }}</td>
+            <td>{{ task.air_result_c }}</td>
+            <td>{{ task.create_date }}</td>
+            <td>{{ task.mod_date }}</td>
+            {% if user.is_superuser %}<td>{{ task.user.username }}</td>{% endif %}
+            <td>
+{#                <a href="{% url 'first:kit_apply_view' task.id %}" class="btn btn-primary" title="View"><i class="fas fa-eye"></i></a>#}
+                <a href="{% url 'first:result_edit' task.id %}" class="btn btn-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                <a href="{% url 'first:result_delete' task.id %}" class="btn btn-danger" title="Delete"><i class="fas fa-trash"></i></a>
+            </td>
+        </tr>
+
+        {% empty %}
+        {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+            <p>Just Empty，<a class="btn btn-primary" href="{% url 'first:result_create' %}"><i class="fas fa-plus-square"></i> Create one</a></p>
+    {% endif %}
+    {% if kits.has_other_pages %}
+    {% bootstrap_pagination kits %}
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block script %}
+{% endblock %}

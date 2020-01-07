@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+
+{% block content %}
+<div class="container">
+<h1 class="text-center">{{ post.title }}</h1>
+    <p class="text-secondary text-center">Pub Date: {{ post.create_date }} | Latest Mod: {{ post.mod_date }}</p>
+    <hr>
+
+{{ post.body|safe }}
+    <hr>
+<h6 class="text-info">Author: {{ post.author }} Uploaded by: {{ post.user.username }}</h6>
+<p>
+    <a class="btn btn-primary" href="{% url 'first:analysis_post_list' %}"><i class="fas fa-list"></i> All</a>
+    <a class="btn btn-warning" href="{% url 'first:analysis_post_edit' post.id %}"><i class="fas fa-edit"></i> Edit</a>
+    <a class="btn btn-danger" href="{% url 'first:analysis_post_delete' post.id %}"><i class="fas fa-trash"></i> Delete</a>
+</p>
+</div>
+{% endblock content %}
+
+
+{% block script %}
+{% endblock %}

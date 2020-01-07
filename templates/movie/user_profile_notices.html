@@ -1,0 +1,107 @@
+{% extends 'movie/user_profile_base.html' %}
+
+{% block user_profile_content %}
+    <div id="notices">
+    <div class="row">
+        {% for notice in notices.object_list %}
+            <div class="col-12" style="margin-top: 5px;margin-bottom: 5px;">
+            <div class="card bg-dark">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <span class="float-left">
+                            <a href="{% url 'movie:user_profile_info' %}?user={{ notice.sender.id }}"><img src="{{ notice.sender.avatar_url }}" class="img-fluid rounded-circle" width="30" alt="">{{ notice.sender }}</a>：
+                        </span>
+                        {{ notice.msg }}
+                        <span class="text-danger" id="status-{{ notice.id }}" {% if notice.is_read %}style="display: none" {% endif %}><i class="fas fa-flag"></i></span>
+                    </h5>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline-primary" title="打开" onclick="OpenNotice({{ notice.id }})"><i class="fas fa-external-link-alt"></i> 去围观</button>
+                    <button class="btn btn-outline-info" title="标记已读" onclick="DismissNotice({{ notice.id }})"><i class="fa fa-check-square"></i> 标记已读</button>
+                    <button class="btn btn-outline-warning" title="全部标记已读" onclick="DismissAllNotice({{ notice.id }})"><i class="fas fa-check-double"></i> 全部标记已读</button>
+
+                </div>
+            </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-white-50 col-12">没有通知</p>
+        {% endfor %}
+    </div>
+    {% load bootstrap4 %}
+    {% if notices.has_other_pages %}
+        <div class="bg-dark" style="margin-top: 5px;">
+        {% bootstrap_pagination notices %}
+        </div>
+    {% endif %}
+    </div>
+
+    </div>
+{% endblock %}
+
+
+{% block script %}
+    {{ block.super }}
+    {% load static %}
+    <script type="text/javascript" src="{% static "jquery-rating-star/rating.js" %}"></script>
+    <script>
+    function OpenNotice(notice_id){
+        $.ajax({
+            url: `/movie/open_notice/${notice_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#status-${notice_id}`).hide();
+                $.toast({
+                    content: '打开中...',
+                    type: 'success',
+                    delay: 5000
+                });
+                setTimeout(function () {
+                    if (result.redirect){
+                        window.location.assign(result.url)
+                    }
+                }, 500)
+            }
+
+        })
+    }
+    function DismissNotice(notice_id){
+        $.ajax({
+            url: `/movie/open_notice/${notice_id}"?dismiss=yes`,
+            type: 'get',
+            success: function (result) {
+                $(`#status-${notice_id}`).hide();
+                $.toast({
+                    content: '成功标记已读',
+                    type: 'success',
+                    delay: 5000
+                });
+                setTimeout(function () {
+                    if (result.redirect){
+                        window.location.assign(result.url)
+                    }
+                }, 500)
+            }
+
+        })
+    }
+    function DismissAllNotice(notice_id) {
+        $.ajax({
+            url: `/movie/open_notice/${notice_id}?dismiss=all`,
+            type: 'get',
+            success: function (result) {
+                $(`#status-${notice_id}`).hide();
+                $.toast({
+                    content: '操作成功',
+                    type: 'success',
+                    delay: 5000
+                });
+                setTimeout(function () {
+                    if (result.redirect){
+                        window.location.assign(result.url)
+                    }
+                }, 500)
+            }
+        })
+    }
+    </script>
+{% endblock %}

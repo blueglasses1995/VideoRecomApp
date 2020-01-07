@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <div id="info" class="card bg-dark">
+        <h1 class="text-center text-white">{{ movie.title }}({{ movie.year }})</h1>
+            <hr>
+            <div class="row">
+            <div class="col-md-4"><img src="{{movie.cover.url}}" alt="cover" class="img-fluid"></div>
+            <div class="col-md-8">
+                <table class="table table-bordered table-dark">
+                    <tbody>
+                    <tr>
+                        <td>片名</td>
+                        <td class="text-danger align-left">{{ movie.title }}</td>
+                    </tr>
+                    <tr>
+                        <td>年份</td>
+                        <td>{{ movie.year }}</td>
+                    </tr>
+                    <tr>
+                        <td>国家或地区</td>
+                        <td>{{ movie.production_countries }}</td>
+                    </tr>
+                    <tr>
+                        <td>导演</td>
+                        <td>{{ movie.director }}</td>
+                    </tr>
+                    <tr>
+                        <td>主演</td>
+                        <td>{{ movie.key_actors }}</td>
+                    </tr>
+                    <tr>
+                        <td>简介</td>
+                        <td>{{ movie.description|safe }}</td>
+                    </tr>
+                    <tr>
+                        <td>类型</td>
+                        <td>
+                            {% for genre in movie.genres.all %}
+                                <a href="{% url 'movie:movie_search' %}?genres={{ genre.id }}">{{ genre.name }}</a>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>标签</td>
+                        <td>
+                            {% for tag in movie.tags.all %}
+                                <a href="{% url 'movie:movie_search' %}?tags={{ tag.id }}">{{ tag.name }}</a>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>打分</td>
+                        <td><div class="row"><div id="rating-review"></div><span class="badge-danger badge-pill text-warning" id="rating-preview">{{ user_score }}</span></div><span class="text-sm-right">Rating:{{ movie.rating }}</span></td>
+                    </tr>
+                    <tr>
+                        <td>影评</td>
+                        <td><a href="{% url 'movie:review_list' %}?movies={{ movie.id }}" class=""><i class="fas fa-star-of-life"></i> Related Reviews</a></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="text-danger">
+                            <button class="btn btn-outline-danger" title="Like" onclick="LikeMovie({{ movie.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ movie.id }}_num">{{ movie.likes }}</span></button>
+                            <button class="btn btn-outline-danger" title="Dislike" onclick="DislikeMovie({{ movie.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ movie.id }}_num">{{ movie.dislikes }}</span></button>
+                            <a class="btn btn-outline-danger" title="Comment" href="#comments-area"><i class="fas fa-comment"></i><span id="comments_{{ movie.id }}_num">{{ movie.comments.count }}</span></a>
+                            <span class="float-md-right">
+                                <button class="btn btn-outline-warning" title="Favourite" onclick="FavouriteMovie({{ movie.id }})"><i class="fas fa-star"></i><span id="favourite_{{ movie.id }}_num">{{ movie.favourites }}</span></button>
+                                <button class="btn btn-outline-warning" title="Watch" onclick="WatchMovie({{ movie.id }})"><i class="fas fa-film"></i><span id="watch_{{ movie.id }}_num">{{ movie.watches }}</span></button>
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        </div>
+    <hr>
+    <div class="card bg-dark" id="comments-area">
+        <div class="row text-white-50 " >
+                <div class="col-2 text-center align-vert"><img src="{{ user.avatar_url }}" alt="{{ user.username }}" title="{{ user.username }}" class="img-fluid rounded-circle" width="120"><br><span>短评</span></div>
+                <div class="col-8 align-vert"><textarea name="comments" id="comments" class="form-control" required></textarea></div>
+                <div class="col-2 align-vert"><button class="btn btn-outline-primary btn-sm" type="button" onclick="PubComment()" title="Submit"><i class="fas fa-paper-plane"></i></button></div>
+    </div>
+    </div>
+
+    <hr>
+    <div id="comments-list">
+
+    {% for comment in comments.object_list %}
+        <div class="card bg-dark" style="margin-top: 5px;">
+            <div class="card-body">
+              <div class="row text-white-50" >
+                <div class="col-2 text-center align-vert">
+                    <div>
+                        <img src="{{ comment.author.avatar_url }}" alt="" title="{{ comment.author.username }}" class="img-fluid rounded-circle" width="120"><br>
+                        <a href="{% url 'movie:user_profile_info' %}?user={{ comment.author.id }}"><span>{{ comment.author.username }}</span></a></div>
+                </div>
+                <div class="col-10">
+                    <p class="card-text">{{ comment.content|safe }}</p>
+                    <p class="text-secondary">{{ comment.pub_date|date:'Y-m-d H:i' }}</p>
+                    <p class="card-footer">
+                        <button class="btn btn-outline-primary btn-sm" title="Like" onclick="LikeComment({{ comment.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ comment.id }}_comment_num">{{ comment.likes }}</span></button>
+                        <button class="btn btn-outline-primary btn-sm" title="Dislike" onclick="DislikeComment({{ comment.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ comment.id }}_comment_num">{{ comment.dislikes }}</span></button>
+                        <button class="btn btn-outline-primary btn-sm" title="Dislike" onclick="FavouriteComment({{ comment.id }})"><i class="fas fa-star"></i><span id="favourite_{{ comment.id }}_comment_num">{{ comment.favourites }}</span></button>
+                    </p>
+                </div>
+              </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card bg-dark" style="margin-top: 5px;">
+            <div class="card-body">
+              <div class="row text-white-50" >
+                <p class="card-text">还没有短评</p>
+              </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% load bootstrap4 %}
+    {% if comments.has_other_pages %}
+        <div class="bg-dark" style="margin-top: 5px;">
+        {% bootstrap_pagination comments %}
+        </div>
+    {% endif %}
+    </div>
+    </div>
+
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static "jquery-rating-star/rating.js" %}"></script>
+    <script>
+    let commentEdit = $('#comments');
+    let csrf_token = "{{ csrf_token }}";
+    let ratingScore = {{ user_score }};
+
+    function WatchMovie(movie_id) {
+        $.ajax({
+            url: `/movie/movie_watch/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#watch_${movie_id }_num`).text(result.watches);
+                $.toast({
+                    content: '跳转中...',
+                    type: 'info',
+                    delay: 5000
+                });
+                setTimeout(function () {
+                    window.location.assign(result.url);
+                }, 1500)
+            }
+        })
+    }
+
+    function LikeMovie(movie_id){
+        $.ajax({
+            url: `/movie/movie_like/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${movie_id}_num`).text(result.likes);
+                $(`#dislike_${movie_id}_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeMovie(movie_id){
+        $.ajax({
+            url: `/movie/movie_dislike/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${movie_id}_num`).text(result.likes);
+                $(`#dislike_${movie_id}_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteMovie(movie_id) {
+        $.ajax({
+            url: `/movie/movie_favourite/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${movie_id}_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+    //
+    
+    function LikeComment(comment_id){
+        $.ajax({
+            url: `/movie/comment_like/${comment_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${comment_id}_comment_num`).text(result.likes);
+                $(`#dislike_${comment_id}_comment_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeComment(comment_id){
+        $.ajax({
+            url: `/movie/comment_dislike/${comment_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${comment_id}_comment_num`).text(result.likes);
+                $(`#dislike_${comment_id}_comment_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteComment(comment_id) {
+        $.ajax({
+            url: `/movie/comment_favourite/${comment_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${comment_id}_comment_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+    
+    //
+    function PubComment(){
+        let comment_content = commentEdit.val();
+        if (comment_content.length < 10) {
+            return $.toast({
+                content: 'Comment should contains 10 chars',
+                title: 'Content is too short',
+                type: 'warning',
+                delay: 5000
+            })
+        } else if (comment_content.length > 1000){
+            return $.toast({
+                content: 'Comment should contains 1000 chars at most',
+                title: 'Too Much Content',
+                type: 'warning',
+                delay: 5000
+            })
+        } else {
+            $.ajax({
+                url: window.location.href,
+                data: {
+                    csrfmiddlewaretoken: csrf_token,
+                    comments: comment_content
+                },
+                type: 'post',
+                success: function (result) {
+                    if (result.status === 'success'){
+                        commentEdit.val('');
+                        $.toast({
+                            content: '短评发表成功',
+                            title: '消息',
+                            type: 'success',
+                            delay: 5000
+                        });
+                        setTimeout(function () {
+                            if (window.location.hash !== ''){
+                               window.location.assign( window.location.href.slice(0, (window.location.href.length - location.hash.length))+'#comments-list');
+                                window.location.reload();
+                            } else{
+                                window.location.assign(window.location.href+'#comments-list');
+                            }
+
+                        }, 500)
+                    }
+                },
+                error: function (data) {
+                    $.toast({
+                        content: '发表短评失败',
+                        title: '注意',
+                        type: 'warning',
+                        delay: 5000
+                    })
+                }
+            })
+        }
+    }
+
+    let ratingButton = $("#rating-review");
+    let ratingPreview = $('#rating-preview');
+
+    $(document).ready(function () {
+        ratingButton.rating({
+            half: true,
+            value: ratingScore,
+            "stars": 10,
+            click: function (e) {
+                if (`${ratingScore}` === `${e.stars}`){
+
+                } else {
+                    $.ajax({
+                    url: '/movie/movie_score/{{ movie.id }}'+ `/${e.stars}`,
+                    type: 'get',
+                    success: function (result) {
+                        ratingScore = e.stars;
+                        ratingPreview.text(e.stars);
+                        $.toast({
+                            content: result.msg,
+                            type: 'info',
+                            delay: 5000
+                        });
+                    }
+                })
+                }
+            },
+        });
+    });
+
+
+
+    </script>
+{% endblock %}

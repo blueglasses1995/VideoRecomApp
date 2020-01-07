@@ -1,0 +1,127 @@
+{% extends 'movie/user_profile_base.html' %}
+
+{% block user_profile_content %}
+    <div id="movies">
+    <div class="row">
+        {% for movie in movies.object_list %}
+            <div class="col-md-6" style="margin-top: 5px;margin-bottom: 5px;">
+            <div class="card bg-dark">
+                <img src="{{ movie.cover.url }}" alt="" class="card-img-top">
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <h5><a href="{% url 'movie:movie_info' movie.id %}">{{ movie.title }} ({{ movie.year }})</a></h5>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="row">
+                            <div class=rating-review" data-rating-stars="10" data-rating-readonly="true" data-rating-half="true" data-rating-value="{{ movie.rating }}"></div>
+                            <span class="badge-danger badge-pill text-warning" id="rating-preview">{{ movie.rating }}</span></div>
+                            </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div >
+                        <div class="float-left">
+                            <button class="btn btn-outline-danger btn-sm" title="点赞" onclick="LikeMovie({{ movie.id }})"><i class="fas fa-thumbs-up"></i><span id="like_{{ movie.id }}_num">{{ movie.likes }}</span></button>
+                            <button class="btn btn-outline-danger btn-sm" title="拍砖" onclick="DislikeMovie({{ movie.id }})"><i class="fas fa-thumbs-down"></i><span id="dislike_{{ movie.id }}_num">{{ movie.dislikes }}</span></button>
+                            <a class="btn btn-outline-danger btn-sm" title="查看影评" href=""><i class="fas fa-comment"></i><span id="comments_{{ movie.id }}_num">{{ movie.reviews.count }}</span></a>
+                        </div>
+                        <div class="float-right">
+                            <button class="btn btn-outline-warning btn-sm" title="收藏" onclick="FavouriteMovie({{ movie.id }})"><i class="fas fa-star"></i><span id="favourite_{{ movie.id }}_num">{{ movie.favourites }}</span></button>
+                            <button class="btn btn-outline-warning btn-sm" title="观看" onclick="WatchMovie({{ movie.id }})"><i class="fas fa-film"></i><span id="watch_{{ movie.id }}_num">{{ movie.watches }}</span></button>
+                        </div>
+                        </div>
+
+                </div>
+            </div>
+            </div>
+        {% empty %}
+            <p class="text-white-50 text-center col-12">
+            {{ the_user.username }} 还没有收藏任何电影 , 去看看 <a href="{% url 'movie:movie_list' %}"><i class="fas fa-list"></i> 所有的电影</a>
+            </p>
+
+        {% endfor %}
+    </div>
+    {% load bootstrap4 %}
+    {% if movies.has_other_pages %}
+        <div class="bg-dark" style="margin-top: 5px;">
+        {% bootstrap_pagination movies %}
+        </div>
+    {% endif %}
+    </div>
+{% endblock %}
+
+
+{% block script %}
+    {{ block.super }}
+    {% load static %}
+    <script type="text/javascript" src="{% static "jquery-rating-star/rating.js" %}"></script>
+    <script>
+    function WatchMovie(movie_id) {
+        $.ajax({
+            url: `/movie/movie_watch/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#watch_${movie_id }_num`).text(result.watches);
+                $.toast({
+                    content: '跳转中...',
+                    type: 'info',
+                    delay: 5000
+                });
+                setTimeout(function () {
+                    window.location.assign(result.url);
+                }, 1500)
+            }
+        })
+    }
+
+    function LikeMovie(movie_id){
+        $.ajax({
+            url: `/movie/movie_like/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${movie_id}_num`).text(result.likes);
+                $(`#dislike_${movie_id}_num`).text(result.dislikes);
+
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function DislikeMovie(movie_id){
+        $.ajax({
+            url: `/movie/movie_dislike/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#like_${movie_id}_num`).text(result.likes);
+                $(`#dislike_${movie_id}_num`).text(result.dislikes);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+
+        })
+    }
+    function FavouriteMovie(movie_id) {
+        $.ajax({
+            url: `/movie/movie_favourite/${movie_id}`,
+            type: 'get',
+            success: function (result) {
+                $(`#favourite_${movie_id}_num`).text(result.favourites);
+                $.toast({
+                    content: result.msg,
+                    type: 'info',
+                    delay: 5000
+                });
+            }
+        })
+    }
+    </script>
+{% endblock %}
