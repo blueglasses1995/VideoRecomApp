@@ -12,7 +12,7 @@ gevent==1.4.0
 greenlet==0.4.15
 importlib-metadata==0.23
 kombu==4.6.5
-lxml==4.4.2
+lxml==4.6.3
 more-itertools==7.2.0
 Pillow==6.2.1
 pycparser==2.19
