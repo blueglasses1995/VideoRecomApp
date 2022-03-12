@@ -14,7 +14,7 @@ importlib-metadata==0.23
 kombu==4.6.5
 lxml==4.4.2
 more-itertools==7.2.0
-Pillow==6.2.1
+Pillow==9.0.1
 pycparser==2.19
 PyMySQL==0.9.3
 pytz==2019.3
